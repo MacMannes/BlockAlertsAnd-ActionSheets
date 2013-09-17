@@ -9,6 +9,7 @@
 
 @interface BlockActionSheet ()
 @property (nonatomic, strong) BlockActionSheet *retainedSelf;
+@property (nonatomic, strong) UILabel *titleLabel;
 
 @end
 
@@ -17,6 +18,14 @@
 @synthesize retainedSelf = _retainedSelf;
 @synthesize view = _view;
 @synthesize vignetteBackground = _vignetteBackground;
+@synthesize backgroundImage = _backgroundImage;
+@synthesize buttonFormat = _buttonFormat;
+@synthesize titleTextColor = _titleTextColor;
+@synthesize titleShadowColor = _titleShadowColor;
+@synthesize buttonTextColor = _buttonTextColor;
+@synthesize cancelButtonTextColor = _cancelButtonTextColor;
+@synthesize destructiveButtonTextColor = _destructiveButtonTextColor;
+@synthesize buttonFont = _buttonFont;
 
 static UIImage *background = nil;
 static UIFont *titleFont = nil;
@@ -67,6 +76,7 @@ static UIFont *buttonFont = nil;
             labelView.shadowOffset = kActionSheetTitleShadowOffset;
             labelView.text = title;
             [_view addSubview:labelView];
+            self.titleLabel = labelView;
             
             _height += size.height + 5;
         }
@@ -140,12 +150,12 @@ static UIFont *buttonFont = nil;
         NSString *title = [block objectAtIndex:1];
         NSString *color = [block objectAtIndex:2];
         
-        UIImage *image = [UIImage imageNamed:[NSString stringWithFormat:@"action-%@-button.png", color]];
+        UIImage *image = [UIImage imageNamed:[NSString stringWithFormat:self.buttonFormat, color]];
         image = [image stretchableImageWithLeftCapWidth:(int)(image.size.width)>>1 topCapHeight:0];
         
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.frame = CGRectMake(kActionSheetBorder, _height, _view.bounds.size.width-kActionSheetBorder*2, kActionSheetButtonHeight);
-        button.titleLabel.font = buttonFont;
+        button.titleLabel.font = (self.buttonFont) ? self.buttonFont: buttonFont;
         if ([button.titleLabel respondsToSelector:@selector(setMinimumScaleFactor:)]) {
             button.titleLabel.minimumScaleFactor = 0.5;
         } else {
@@ -158,8 +168,14 @@ static UIFont *buttonFont = nil;
         button.tag = i++;
         
         [button setBackgroundImage:image forState:UIControlStateNormal];
-        [button setTitleColor:kActionSheetButtonTextColor forState:UIControlStateNormal];
-        [button setTitleShadowColor:kActionSheetButtonShadowColor forState:UIControlStateNormal];
+        if ([color isEqualToString:@"red"]) {
+            [button setTitleColor:self.destructiveButtonTextColor forState:UIControlStateNormal];
+        } else if ([color isEqualToString:@"gray"]) {
+            [button setTitleColor:self.cancelButtonTextColor forState:UIControlStateNormal];
+        } else {
+            [button setTitleColor:self.buttonTextColor forState:UIControlStateNormal];
+        }
+        [button setTitleShadowColor:self.buttonShadowColor forState:UIControlStateNormal];
         [button setTitle:title forState:UIControlStateNormal];
         button.accessibilityLabel = title;
         
@@ -170,7 +186,7 @@ static UIFont *buttonFont = nil;
     }
     
     UIImageView *modalBackground = [[UIImageView alloc] initWithFrame:_view.bounds];
-    modalBackground.image = background;
+    modalBackground.image = (self.backgroundImage) ? self.backgroundImage : background;
     modalBackground.contentMode = UIViewContentModeScaleToFill;
     [_view insertSubview:modalBackground atIndex:0];
     
@@ -236,6 +252,69 @@ static UIFont *buttonFont = nil;
         _view = nil;
         [self setRetainedSelf:nil];
     }
+}
+
+#pragma mark - Getters / Setters
+
+- (NSString *)buttonFormat
+{
+    if (_buttonFormat) {
+        return _buttonFormat;
+    }
+    
+    return @"action-%@-button.png";
+}
+
+- (void)setTitleTextColor:(UIColor *)titleTextColor
+{
+    _titleTextColor = titleTextColor;
+    if (self.titleLabel) {
+        [self.titleLabel setTextColor:titleTextColor];
+    }
+}
+
+- (void)setTitleShadowColor:(UIColor *)titleShadowColor
+{
+    _titleShadowColor = titleShadowColor;
+    if (self.titleLabel) {
+        [self.titleLabel setShadowColor:titleShadowColor];
+    }
+}
+
+- (UIColor *)buttonTextColor
+{
+    if (_buttonTextColor) {
+        return _buttonTextColor;
+    }
+    
+    return kActionSheetButtonTextColor;
+}
+
+- (UIColor *)cancelButtonTextColor
+{
+    if (_cancelButtonTextColor) {
+        return _cancelButtonTextColor;
+    }
+    
+    return kActionSheetButtonTextColor;
+}
+
+- (UIColor *)destructiveButtonTextColor
+{
+    if (_destructiveButtonTextColor) {
+        return _destructiveButtonTextColor;
+    }
+    
+    return kActionSheetButtonTextColor;
+}
+
+- (UIColor *)buttonShadowColor
+{
+    if (_buttonShadowColor) {
+        return _buttonShadowColor;
+    }
+    
+    return kActionSheetButtonShadowColor;
 }
 
 #pragma mark - Action

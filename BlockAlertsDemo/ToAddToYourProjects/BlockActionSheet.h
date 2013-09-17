@@ -15,7 +15,17 @@
 }
 
 @property (nonatomic, readonly, strong) UIView *view;
+@property (nonatomic, strong) UIImage *backgroundImage;
 @property (nonatomic, readwrite) BOOL vignetteBackground;
+@property (nonatomic, strong) NSString *buttonFormat;
+@property (nonatomic, strong) UIColor *titleTextColor;
+@property (nonatomic, strong) UIColor *titleShadowColor;
+@property (nonatomic, strong) UIColor *buttonTextColor;
+@property (nonatomic, strong) UIColor *cancelButtonTextColor;
+@property (nonatomic, strong) UIColor *destructiveButtonTextColor;
+@property (nonatomic, strong) UIColor *buttonShadowColor;
+@property (nonatomic, strong) UIFont *buttonFont;
+
 
 + (id)sheetWithTitle:(NSString *)title;
 
