@@ -12,6 +12,10 @@
 #define kPickerViewSpacing     5
 #define kPickerViewHorizontalMargin 0
 
+#ifndef kCFCoreFoundationVersionNumber_iOS_7_0
+#define kCFCoreFoundationVersionNumber_iOS_7_0 847.2
+#endif
+
 @implementation BlockPickerActionSheet
 
 - (id)initWithTitle:(NSString *)title rows:(NSArray *)rows
@@ -58,6 +62,21 @@
 - (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
 {
     return [self.rows objectAtIndex:row];
+}
+
+- (NSAttributedString *)pickerView:(UIPickerView *)pickerView attributedTitleForRow:(NSInteger)row forComponent:(NSInteger)component
+{
+    NSMutableAttributedString *attrTitle = nil;
+    NSString *title = [self pickerView:pickerView titleForRow:row forComponent:component];
+    attrTitle = [[NSMutableAttributedString alloc] initWithString:title];
+    
+    UIColor *color = (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_7_0) ? [UIColor whiteColor] : [UIColor blackColor];
+
+    [attrTitle addAttribute:NSForegroundColorAttributeName
+                      value:color
+                      range:NSMakeRange(0, [attrTitle length])];
+    
+    return attrTitle;
 }
 
 @end
