@@ -292,14 +292,7 @@ static UIFont *buttonFont = nil;
 
 - (void)dismissWithClickedButtonIndex:(NSInteger)buttonIndex animated:(BOOL)animated 
 {
-    if (buttonIndex >= 0 && buttonIndex < [_blocks count])
-    {
-        id obj = [[_blocks objectAtIndex: buttonIndex] objectAtIndex:0];
-        if (![obj isEqual:[NSNull null]])
-        {
-            ((void (^)())obj)();
-        }
-    }
+    __weak __typeof(&*self)weakSelf = self;
     
     if (animated)
     {
@@ -307,24 +300,25 @@ static UIFont *buttonFont = nil;
                               delay:0.0
                             options:0
                          animations:^{
-                             CGPoint center = self.view.center;
+                             CGPoint center = weakSelf.view.center;
                              center.y += 20;
-                             self.view.center = center;
+                             weakSelf.view.center = center;
                          } 
                          completion:^(BOOL finished) {
                              [UIView animateWithDuration:0.4
                                                    delay:0.0 
                                                  options:UIViewAnimationCurveEaseIn
                                               animations:^{
-                                                  CGRect frame = self.view.frame;
+                                                  CGRect frame = weakSelf.view.frame;
                                                   frame.origin.y = -frame.size.height;
-                                                  self.view.frame = frame;
+                                                  weakSelf.view.frame = frame;
                                                   [[BlockBackground sharedInstance] reduceAlphaIfEmpty];
                                               } 
                                               completion:^(BOOL finished) {
-                                                  [[BlockBackground sharedInstance] removeView:self.view];
-                                                  self.view = nil;
-                                                  [self setRetainedSelf:nil];
+                                                  [[BlockBackground sharedInstance] removeView:weakSelf.view];
+                                                  weakSelf.view = nil;
+                                                  [weakSelf performBlockWithButtonIndex:buttonIndex];
+                                                  [weakSelf setRetainedSelf:nil];
                                               }];
                          }];
     }
@@ -332,7 +326,20 @@ static UIFont *buttonFont = nil;
     {
         [[BlockBackground sharedInstance] removeView:self.view];
         self.view = nil;
+        [weakSelf performBlockWithButtonIndex:buttonIndex];
         [self setRetainedSelf:nil];
+    }
+}
+
+- (void)performBlockWithButtonIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex >= 0 && buttonIndex < [_blocks count])
+    {
+        id obj = [[_blocks objectAtIndex: buttonIndex] objectAtIndex:0];
+        if (![obj isEqual:[NSNull null]])
+        {
+            ((void (^)())obj)();
+        }
     }
 }
 

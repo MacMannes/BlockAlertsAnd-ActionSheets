@@ -221,14 +221,7 @@ static UIFont *buttonFont = nil;
 
 - (void)dismissWithClickedButtonIndex:(NSInteger)buttonIndex animated:(BOOL)animated 
 {
-    if (buttonIndex >= 0 && buttonIndex < [_blocks count])
-    {
-        id obj = [[_blocks objectAtIndex: buttonIndex] objectAtIndex:0];
-        if (![obj isEqual:[NSNull null]])
-        {
-            ((void (^)())obj)();
-        }
-    }
+    __weak __typeof(&*self)weakSelf = self;
     
     if (animated)
     {
@@ -243,14 +236,28 @@ static UIFont *buttonFont = nil;
                          } completion:^(BOOL finished) {
                              [[BlockBackground sharedInstance] removeView:_view];
                              _view = nil;
+                             [weakSelf performBlockWithButtonIndex:buttonIndex];
+                             [weakSelf setRetainedSelf:nil];
                          }];
-        [self setRetainedSelf:nil];
     }
     else
     {
         [[BlockBackground sharedInstance] removeView:_view];
         _view = nil;
+        [self performBlockWithButtonIndex:buttonIndex];
         [self setRetainedSelf:nil];
+    }
+}
+
+- (void)performBlockWithButtonIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex >= 0 && buttonIndex < [_blocks count])
+    {
+        id obj = [[_blocks objectAtIndex: buttonIndex] objectAtIndex:0];
+        if (![obj isEqual:[NSNull null]])
+        {
+            ((void (^)())obj)();
+        }
     }
 }
 
